@@ -100,14 +100,38 @@ exports.eliminarMensaje = async (req, res) => {
 const eliminarUsuario = async (req, res) => {
   const { id } = req.params;
   try {
-    // Elimina en todas las tablas relacionadas antes de eliminar el usuario
+    // 1. Obtener asignaturas del profesor (si es profesor)
+    const asignaturas = await pool.query('SELECT id FROM asignatura WHERE profesor_id = $1', [id]);
+    const asignaturaIds = asignaturas.rows.map(a => a.id);
+
+    // 2. Eliminar evaluaciones de las asignaturas del profesor
+    if (asignaturaIds.length > 0) {
+      await pool.query('DELETE FROM evaluacion WHERE asignatura_id = ANY($1)', [asignaturaIds]);
+      await pool.query('DELETE FROM evaluacion_profe WHERE asignatura_id = ANY($1)', [asignaturaIds]);
+    }
+
+    // 3. Eliminar inscripciones a las asignaturas del profesor
+    if (asignaturaIds.length > 0) {
+      await pool.query('DELETE FROM inscripcion WHERE asignatura_id = ANY($1)', [asignaturaIds]);
+    }
+
+    // 4. Eliminar horarios de las asignaturas del profesor
+    if (asignaturaIds.length > 0) {
+      await pool.query('DELETE FROM asignatura_horario WHERE asignatura_id = ANY($1)', [asignaturaIds]);
+    }
+
+    // 5. Eliminar asignaturas del profesor
+    await pool.query('DELETE FROM asignatura WHERE profesor_id = $1', [id]);
+
+    // 6. Eliminar registros del usuario en otras tablas
     await pool.query('DELETE FROM simulacion_nota WHERE usuario_id = $1', [id]);
     await pool.query('DELETE FROM contacto WHERE usuario_id = $1', [id]);
     await pool.query('DELETE FROM evaluacion WHERE usuario_id = $1', [id]);
-    // Agrega aquí más tablas si tienes otras relaciones con usuario
+    await pool.query('DELETE FROM inscripcion WHERE usuario_id = $1', [id]);
 
-    // Finalmente elimina el usuario
+    // 7. Finalmente eliminar el usuario
     await pool.query('DELETE FROM usuario WHERE id = $1', [id]);
+    
     res.redirect('/admin/usuarios?exito=Usuario eliminado correctamente');
   } catch (err) {
     console.error('Error al eliminar usuario:', err);
