@@ -62,7 +62,7 @@ app.use(session({
 }));
 
 // Servir archivos estáticos desde 'public'
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Landing page (home)
 app.get('/', (req, res) => {
