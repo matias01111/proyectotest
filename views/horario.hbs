@@ -102,8 +102,11 @@
 </main>
 <script>
   window.evaluaciones = {{{json evaluaciones}}};
-</script>
-<script>
+  console.log('=== DEBUG EVALUACIONES ===');
+  console.log('Evaluaciones recibidas:', window.evaluaciones);
+  console.log('Primer día fecha:', document.querySelector('.dia-tab')?.dataset.fecha);
+  console.log('Asignaturas en el horario:', document.querySelectorAll('.asig-info'));
+
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.dia-tab');
     const bloques = document.querySelectorAll('.bloques-dia-content');
