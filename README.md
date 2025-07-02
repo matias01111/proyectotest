@@ -76,6 +76,11 @@ Plataforma web para la gestión de horarios, asignaturas y evaluaciones universi
 - La base de datos se debe restaurar **usando el backup entregado**. No es necesario crear tablas manualmente.
 - Si tienes problemas con la base de datos, revisa la configuración en `.env`.
 - Puedes modificar los estilos en la carpeta `public/css`.
+- **Recuperación de contraseña:**  
+  El sistema utiliza [Nodemailer](https://nodemailer.com/about/) para enviar correos de recuperación.  
+  Por defecto, los enlaces de recuperación usan la URL del servidor donde se ejecuta la app (por ejemplo, `localhost` en desarrollo).  
+  Si despliegas la aplicación en producción, puedes modificar el enlace generado para que apunte a tu dominio real (por ejemplo, `https://tudominio.com/auth/restablecer/...`).  
+  Nodemailer solo envía el enlace que tú definas en el código, así que puedes personalizarlo según tu entorno.
 
 ---
 
