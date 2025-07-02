@@ -114,10 +114,9 @@ const mostrarHorarioDiario = async (req, res) => {
       const asig = asignaturas.find(a => String(a.id) === String(ev.asignatura_id));
       ev.asignatura_nombre = asig ? asig.nombre : 'Asignatura eliminada';
       
-      // IMPORTANTE: Usar fecha directa sin procesamiento
-      ev.fechaISO = ev.fecha; // YYYY-MM-DD directo de la BD
-      const d = new Date(ev.fecha);
-      ev.fechaString = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
+      // SOLUCIÓN: Convertir siempre a formato YYYY-MM-DD
+      ev.fechaISO = new Date(ev.fecha).toISOString().split('T')[0];
+      ev.fechaString = new Date(ev.fecha).toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
     });
 
     // Filtra evaluaciones eliminadas
@@ -126,10 +125,11 @@ const mostrarHorarioDiario = async (req, res) => {
     // Agrupa evaluaciones por fecha (YYYY-MM-DD)
     const evaluacionesPorDia = {};
     evaluacionesFiltradas.forEach(ev => {
-      if (!evaluacionesPorDia[ev.fechaISO]) {
-        evaluacionesPorDia[ev.fechaISO] = [];
+      const fechaKey = new Date(ev.fecha).toISOString().split('T')[0]; // Usar fecha YYYY-MM-DD
+      if (!evaluacionesPorDia[fechaKey]) {
+        evaluacionesPorDia[fechaKey] = [];
       }
-      evaluacionesPorDia[ev.fechaISO].push(ev);
+      evaluacionesPorDia[fechaKey].push(ev);
     });
 
     // Al final de mostrarHorarioDiario, antes de res.render:
