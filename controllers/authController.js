@@ -118,8 +118,8 @@ const olvidoEnviar = async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'matias.mora1@mail.udp.cl',
-      pass: 'fbbf zwek aftd yvyy'
+      user: 'matiasmoratrabajo@gmail.com',
+      pass: 'evtb bets xnuv ydwm'
     }
   });
 
