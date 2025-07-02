@@ -30,9 +30,21 @@ exports.verPerfil = async (req, res) => {
     
     if (ev.fecha) {
       try {
-        // La fecha viene como YYYY-MM-DD, convierte a DateTime
-        const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
-        fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
+        // Si la fecha viene como string DD-MM-YYYY (formato chileno)
+        if (typeof ev.fecha === 'string' && ev.fecha.includes('-')) {
+          const [day, month, year] = ev.fecha.split('-');
+          const dt = DateTime.fromObject({ 
+            year: parseInt(year), 
+            month: parseInt(month), 
+            day: parseInt(day) 
+          }, { zone: 'America/Santiago' });
+          
+          fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
+        } else {
+          // Si viene en formato ISO o Date
+          const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
+          fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
+        }
       } catch (error) {
         console.log('Error al formatear fecha:', ev.fecha, error);
         fechaString = 'Fecha inválida';

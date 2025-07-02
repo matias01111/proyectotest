@@ -1,5 +1,5 @@
 const pool = require('../db/db');
-// const { DateTime } = require('luxon');
+const { DateTime } = require('luxon');
 
 // Función para capitalizar la primera letra
 function capitalizeFirst(str) {
@@ -18,7 +18,7 @@ const mostrarHorarioDiario = async (req, res) => {
       '17:30 - 18:50'
     ];
 
-    // const hoyChileDT = DateTime.now().setZone('America/Santiago');
+    const hoyChileDT = DateTime.now().setZone('America/Santiago');
     let semanaBaseDT;
 
     if (req.query.semana) {
@@ -114,12 +114,10 @@ const mostrarHorarioDiario = async (req, res) => {
       const asig = asignaturas.find(a => String(a.id) === String(ev.asignatura_id));
       ev.asignatura_nombre = asig ? asig.nombre : 'Asignatura eliminada';
       
-      // La fecha ya viene en formato YYYY-MM-DD, úsala directamente
-      ev.fechaISO = ev.fecha; // Ya está en el formato correcto
-      
-      // Solo formatea para mostrar
-      const fecha = new Date(ev.fecha + 'T12:00:00');
-      ev.fechaString = fecha.toLocaleDateString('es-CL');
+      // Corregido: interpreta directamente en zona horaria de Chile
+      const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
+      ev.fechaISO = dt.toISODate(); // YYYY-MM-DD en Chile
+      ev.fechaString = dt.setLocale('es-CL').toLocaleString({ year: 'numeric', month: 'short', day: 'numeric' });
     });
 
     // Filtra evaluaciones eliminadas
