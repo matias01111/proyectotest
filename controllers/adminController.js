@@ -59,7 +59,7 @@ exports.mensajes = async (req, res) => {
 
 exports.usuarios = async (req, res) => {
   const alumnos = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'alumno'")).rows;
-  const profesores = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'profesor'")).rows;
+  const profesores = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'profesor' AND aprobado = true")).rows;
   res.render('adminUsuarios', { 
     alumnos, 
     profesores, 
