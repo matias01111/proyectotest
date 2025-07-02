@@ -114,7 +114,7 @@ const mostrarHorarioDiario = async (req, res) => {
       const asig = asignaturas.find(a => String(a.id) === String(ev.asignatura_id));
       ev.asignatura_nombre = asig ? asig.nombre : 'Asignatura eliminada';
       
-      // Usa la misma lógica que misAsignaturasController
+      // IMPORTANTE: Usar fecha directa sin procesamiento
       ev.fechaISO = ev.fecha; // YYYY-MM-DD directo de la BD
       const d = new Date(ev.fecha);
       ev.fechaString = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -125,10 +125,12 @@ const mostrarHorarioDiario = async (req, res) => {
 
     // Agrupa evaluaciones por fecha (YYYY-MM-DD)
     const evaluacionesPorDia = {};
-    for (const ev of evaluacionesFiltradas) {
-      if (!evaluacionesPorDia[ev.fechaISO]) evaluacionesPorDia[ev.fechaISO] = [];
+    evaluacionesFiltradas.forEach(ev => {
+      if (!evaluacionesPorDia[ev.fechaISO]) {
+        evaluacionesPorDia[ev.fechaISO] = [];
+      }
       evaluacionesPorDia[ev.fechaISO].push(ev);
-    }
+    });
 
     // Al final de mostrarHorarioDiario, antes de res.render:
     const hoyChile = DateTime.now().setZone('America/Santiago').toISODate();
