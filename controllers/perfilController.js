@@ -28,8 +28,7 @@ exports.verPerfil = async (req, res) => {
   const evaluaciones = evalsResult.rows.map(ev => ({
     ...ev,
     fechaString: capitalizeFirst(
-      DateTime.fromJSDate(new Date(ev.fecha), { zone: 'utc' })
-        .setZone('America/Santiago')
+      DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' })
         .setLocale('es')
         .toFormat('cccc d/LL/yyyy')
     )

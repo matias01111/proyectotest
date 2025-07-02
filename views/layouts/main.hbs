@@ -34,9 +34,15 @@
           {{!-- Logo redirige según tipo de usuario --}}
           {{#if usuario}}
             {{#if (eq usuario.role "profesor")}}
-              <a href="/profesor/dashboard" class="nav-logo">MiPortalEstudiantil</a>
+              {{#if usuario.aprobado}}
+                <a href="/profesor/dashboard" class="nav-logo">MiPortalEstudiantil</a>
+              {{else}}
+                <a href="/" class="nav-logo">MiPortalEstudiantil</a>
+              {{/if}}
+            {{else if (eq usuario.role "admin")}}
+              <a href="/admin/dashboard" class="nav-logo">MiPortalEstudiantil</a>
             {{else}}
-              <a href="/" class="nav-logo">MiPortalEstudiantil</a>
+              <a href="/dashboard" class="nav-logo">MiPortalEstudiantil</a>
             {{/if}}
           {{else}}
             <a href="/" class="nav-logo">MiPortalEstudiantil</a>

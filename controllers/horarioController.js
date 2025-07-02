@@ -113,8 +113,9 @@ const mostrarHorarioDiario = async (req, res) => {
       ev.asignatura_id = String(ev.asignatura_id);
       const asig = asignaturas.find(a => String(a.id) === String(ev.asignatura_id));
       ev.asignatura_nombre = asig ? asig.nombre : 'Asignatura eliminada';
-      // Usa zona horaria de Chile
-      const dt = DateTime.fromJSDate(new Date(ev.fecha), { zone: 'utc' }).setZone('America/Santiago');
+      
+      // Corregido: interpreta directamente en zona horaria de Chile
+      const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
       ev.fechaISO = dt.toISODate(); // YYYY-MM-DD en Chile
       ev.fechaString = dt.setLocale('es-CL').toLocaleString({ year: 'numeric', month: 'short', day: 'numeric' });
     });

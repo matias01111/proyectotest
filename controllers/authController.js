@@ -104,10 +104,12 @@ const olvidoVista = (req, res) => {
 
 const olvidoEnviar = async (req, res) => {
   const { email } = req.body;
-  const user = (await pool.query('SELECT id FROM usuario WHERE email = $1', [email])).rows[0];
+  const user = (await pool.query('SELECT id, role, aprobado FROM usuario WHERE email = $1', [email])).rows[0];
+  
   if (!user) {
     return res.render('authOlvido', { mensaje: 'Si el correo existe, recibirás un enlace.' });
   }
+
   const token = crypto.randomBytes(32).toString('hex');
   const expires = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
 

@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
 
 exports.dashboard = async (req, res) => {
   const [{ count: alumnos }] = (await pool.query("SELECT COUNT(*) FROM usuario WHERE role = 'alumno'")).rows;
-  const [{ count: profesores }] = (await pool.query("SELECT COUNT(*) FROM usuario WHERE role = 'profesor'")).rows;
+  const [{ count: profesores }] = (await pool.query("SELECT COUNT(*) FROM usuario WHERE role = 'profesor' AND aprobado = true")).rows;
   const [{ count: mensajes }] = (await pool.query("SELECT COUNT(*) FROM contacto")).rows;
   res.render('adminDashboard', {
     alumnos,
