@@ -102,12 +102,14 @@
 </main>
 <script>
   window.evaluaciones = {{{json evaluaciones}}};
-  console.log('=== DEBUG EVALUACIONES ===');
-  console.log('Evaluaciones recibidas:', window.evaluaciones);
-  console.log('Primer día fecha:', document.querySelector('.dia-tab')?.dataset.fecha);
-  console.log('Asignaturas en el horario:', document.querySelectorAll('.asig-info'));
 
   document.addEventListener('DOMContentLoaded', function() {
+    // Ahora los console.logs van aquí
+    console.log('=== DEBUG EVALUACIONES ===');
+    console.log('Evaluaciones recibidas:', window.evaluaciones);
+    console.log('Primer día fecha:', document.querySelector('.dia-tab')?.dataset.fecha);
+    console.log('Asignaturas en el horario:', document.querySelectorAll('.asig-info'));
+
     const tabs = document.querySelectorAll('.dia-tab');
     const bloques = document.querySelectorAll('.bloques-dia-content');
     let semanaBase = "{{semanaBase}}";
