@@ -24,36 +24,12 @@ exports.verPerfil = async (req, res) => {
     LIMIT 5
   `, [userId, hoyChile]);
 
-  // Formatea la fecha para mostrarla bonito y con día en mayúscula
+  // Formatea las fechas igual que misAsignaturasController
   const evaluaciones = evalsResult.rows.map(ev => {
-    let fechaString = 'Fecha no disponible';
-    
-    if (ev.fecha) {
-      try {
-        // Si la fecha viene como string DD-MM-YYYY (formato chileno)
-        if (typeof ev.fecha === 'string' && ev.fecha.includes('-')) {
-          const [day, month, year] = ev.fecha.split('-');
-          const dt = DateTime.fromObject({ 
-            year: parseInt(year), 
-            month: parseInt(month), 
-            day: parseInt(day) 
-          }, { zone: 'America/Santiago' });
-          
-          fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
-        } else {
-          // Si viene en formato ISO o Date
-          const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
-          fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
-        }
-      } catch (error) {
-        console.log('Error al formatear fecha:', ev.fecha, error);
-        fechaString = 'Fecha inválida';
-      }
-    }
-    
+    const d = new Date(ev.fecha);
     return {
       ...ev,
-      fechaString
+      fechaString: d.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' })
     };
   });
 

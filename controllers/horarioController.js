@@ -114,10 +114,10 @@ const mostrarHorarioDiario = async (req, res) => {
       const asig = asignaturas.find(a => String(a.id) === String(ev.asignatura_id));
       ev.asignatura_nombre = asig ? asig.nombre : 'Asignatura eliminada';
       
-      // Corregido: interpreta directamente en zona horaria de Chile
-      const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
-      ev.fechaISO = dt.toISODate(); // YYYY-MM-DD en Chile
-      ev.fechaString = dt.setLocale('es-CL').toLocaleString({ year: 'numeric', month: 'short', day: 'numeric' });
+      // Usa la misma lógica que misAsignaturasController
+      ev.fechaISO = ev.fecha; // YYYY-MM-DD directo de la BD
+      const d = new Date(ev.fecha);
+      ev.fechaString = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric' });
     });
 
     // Filtra evaluaciones eliminadas
