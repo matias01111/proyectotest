@@ -29,7 +29,13 @@ exports.dashboard = async (req, res) => {
   const [{ count: alumnos }] = (await pool.query("SELECT COUNT(*) FROM usuario WHERE role = 'alumno'")).rows;
   const [{ count: profesores }] = (await pool.query("SELECT COUNT(*) FROM usuario WHERE role = 'profesor'")).rows;
   const [{ count: mensajes }] = (await pool.query("SELECT COUNT(*) FROM contacto")).rows;
-  res.render('adminDashboard', { alumnos, profesores, mensajes, isAdmin: true });
+  res.render('adminDashboard', {
+    alumnos,
+    profesores,
+    mensajes,
+    isAdmin: true,
+    exito: req.query.exito
+  });
 };
 
 function capitalizeFirst(str) {
@@ -54,7 +60,12 @@ exports.mensajes = async (req, res) => {
 exports.usuarios = async (req, res) => {
   const alumnos = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'alumno'")).rows;
   const profesores = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'profesor'")).rows;
-  res.render('adminUsuarios', { alumnos, profesores, isAdmin: true });
+  res.render('adminUsuarios', { 
+    alumnos, 
+    profesores, 
+    isAdmin: true,
+    exito: req.query.exito // <-- agrega esto
+  });
 };
 
 exports.perfilVista = async (req, res) => {
@@ -86,9 +97,48 @@ exports.eliminarMensaje = async (req, res) => {
   res.redirect('/admin/mensajes');
 };
 
-exports.eliminarUsuario = async (req, res) => {
-  await pool.query('DELETE FROM usuario WHERE id = $1', [req.params.id]);
-  const alumnos = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'alumno'")).rows;
-  const profesores = (await pool.query("SELECT id, username, email FROM usuario WHERE role = 'profesor'")).rows;
-  res.render('adminUsuarios', { alumnos, profesores, isAdmin: true, exito: 'Usuario eliminado correctamente.' });
+const eliminarUsuario = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Elimina en todas las tablas relacionadas antes de eliminar el usuario
+    await pool.query('DELETE FROM simulacion_nota WHERE usuario_id = $1', [id]);
+    await pool.query('DELETE FROM contacto WHERE usuario_id = $1', [id]);
+    await pool.query('DELETE FROM evaluacion WHERE usuario_id = $1', [id]);
+    // Agrega aquí más tablas si tienes otras relaciones con usuario
+
+    // Finalmente elimina el usuario
+    await pool.query('DELETE FROM usuario WHERE id = $1', [id]);
+    res.redirect('/admin/usuarios?exito=Usuario eliminado correctamente');
+  } catch (err) {
+    console.error('Error al eliminar usuario:', err);
+    res.redirect('/admin/usuarios?error=No se pudo eliminar el usuario');
+  }
+};
+
+exports.eliminarUsuario = eliminarUsuario;
+
+// Mostrar profesores pendientes
+exports.profesoresPendientes = async (req, res) => {
+  const profesores = (await pool.query(
+    "SELECT id, username, email FROM usuario WHERE role = 'profesor' AND aprobado = false"
+  )).rows;
+  res.render('adminProfesoresPendientes', { profesores, isAdmin: true });
+};
+
+// Aprobar profesor
+exports.aprobarProfesor = async (req, res) => {
+  await pool.query(
+    "UPDATE usuario SET aprobado = true WHERE id = $1 AND role = 'profesor'",
+    [req.params.id]
+  );
+  res.redirect('/admin/dashboard?exito=Profesor%20aprobado%20correctamente');
+};
+
+// Rechazar (eliminar) profesor
+exports.rechazarProfesor = async (req, res) => {
+  await pool.query(
+    "DELETE FROM usuario WHERE id = $1 AND role = 'profesor' AND aprobado = false",
+    [req.params.id]
+  );
+  res.redirect('/admin/profesores/pendientes');
 };

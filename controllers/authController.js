@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const pool = require('../db/db');
 const bcrypt = require('bcrypt');
 
@@ -32,9 +34,14 @@ const login = async (req, res) => {
     req.session.username = usuario.username;
     req.session.email = usuario.email; // <-- añade esto
     req.session.role = usuario.role;
+    req.session.aprobado = usuario.aprobado; // para profesores
 
-    // Redirigir a dashboard
-    res.redirect('/dashboard');
+    if (usuario.role === 'admin') return res.redirect('/admin/dashboard');
+    if (usuario.role === 'profesor') {
+      if (!usuario.aprobado) return res.render('profesorPendiente', { usuario });
+      return res.redirect('/profesor/dashboard');
+    }
+    return res.redirect('/dashboard'); // alumno
   } catch (err) {
     console.error('Error en login:', err);
     res.render('login', { error: 'Error interno del servidor' });
@@ -91,4 +98,63 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+const olvidoVista = (req, res) => {
+  res.render('authOlvido');
+};
+
+const olvidoEnviar = async (req, res) => {
+  const { email } = req.body;
+  const user = (await pool.query('SELECT id FROM usuario WHERE email = $1', [email])).rows[0];
+  if (!user) {
+    return res.render('authOlvido', { mensaje: 'Si el correo existe, recibirás un enlace.' });
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
+
+  await pool.query('UPDATE usuario SET reset_token = $1, reset_expires = $2 WHERE id = $3', [token, expires, user.id]);
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'matias.mora1@mail.udp.cl',
+      pass: 'fbbf zwek aftd yvyy'
+    }
+  });
+
+  const resetUrl = `http://${req.headers.host}/auth/restablecer/${token}`;
+  await transporter.sendMail({
+    to: email,
+    subject: 'Recupera tu contraseña',
+    html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+           <p><a href="${resetUrl}">${resetUrl}</a></p>
+           <p>Este enlace expirará en 30 minutos.</p>`
+  });
+
+  res.render('authOlvido', { mensaje: 'Si el correo existe, recibirás un enlace.' });
+};
+
+const restablecerVista = async (req, res) => {
+  const { token } = req.params;
+  const user = (await pool.query('SELECT id FROM usuario WHERE reset_token = $1 AND reset_expires > NOW()', [token])).rows[0];
+  if (!user) return res.send('Enlace inválido o expirado.');
+  res.render('authRestablecer', { token });
+};
+
+const restablecerGuardar = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const user = (await pool.query('SELECT id FROM usuario WHERE reset_token = $1 AND reset_expires > NOW()', [token])).rows[0];
+  if (!user) return res.send('Enlace inválido o expirado.');
+  const hashed = await bcrypt.hash(password, 10);
+  await pool.query('UPDATE usuario SET password_hash = $1, reset_token = NULL, reset_expires = NULL WHERE id = $2', [hashed, user.id]);
+  res.redirect('/auth/login');
+};
+
+module.exports = {
+  login,
+  register,
+  olvidoVista,
+  olvidoEnviar,
+  restablecerVista,
+  restablecerGuardar
+};

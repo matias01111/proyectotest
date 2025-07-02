@@ -11,13 +11,15 @@ exports.verPerfil = async (req, res) => {
   const userId = req.session.userId;
   const userResult = await pool.query('SELECT username, email, role, foto FROM usuario WHERE id = $1', [userId]);
 
-  // Obtener las 5 evaluaciones pendientes más cercanas
+  // Obtener las 5 evaluaciones pendientes más cercanas SOLO de asignaturas inscritas
   const hoyChile = DateTime.now().setZone('America/Santiago').toISODate();
   const evalsResult = await pool.query(`
     SELECT e.nombre, e.tipo, e.fecha, a.nombre AS asignatura_nombre
     FROM evaluacion e
     JOIN asignatura a ON a.id = e.asignatura_id
-    WHERE e.usuario_id = $1 AND e.fecha >= $2
+    WHERE e.usuario_id = $1
+      AND e.fecha >= $2
+      AND e.asignatura_id IN (SELECT asignatura_id FROM inscripcion WHERE usuario_id = $1)
     ORDER BY e.fecha ASC
     LIMIT 5
   `, [userId, hoyChile]);

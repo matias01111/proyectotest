@@ -5,7 +5,7 @@
       <p class="form-message error">{{error}}</p>
     {{/if}}
     {{#if successMessage}}
-      <p class="form-message success">{{successMessage}}</p>
+      <p class="form-message success" id="register-success">{{successMessage}}</p>
     {{/if}}
     <p id="register-error" class="form-message error" style="display:none;font-size:0.93em;padding:4px 0;margin-bottom:6px;"></p>
     <form id="registerForm" action="/auth/register" method="POST" autocomplete="off">
@@ -48,10 +48,23 @@
       </div>
     </form>
     <p class="form-switch" style="margin-top:8px;font-size:0.95em;">
-      ¿Ya tienes cuenta? <a href="/auth/login">Inicia sesión aquí</a>
+       <a href="/auth/login">¿Ya tienes cuenta? Inicia sesión aquí</a>
     </p>
   </div>
 </main>
+
+<style>
+  .form-switch a {
+    pointer-events: auto !important;
+    color: #3b5998;
+    text-decoration: underline;
+    cursor: pointer;
+    z-index: 10;
+    position: relative;
+  }
+  /* Asegura que ningún .step esté encima cuando está oculto */
+
+</style>
 
 <script>
   const nextBtn = document.getElementById('nextBtn');
@@ -109,6 +122,16 @@
       errorMsg.style.display = 'block';
       event.preventDefault();
       return;
+    }
+  });
+
+  // Oculta el mensaje de éxito después de 2.5 segundos
+  window.addEventListener('DOMContentLoaded', function() {
+    const msg = document.getElementById('register-success');
+    if (msg) {
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 2500);
     }
   });
 </script>

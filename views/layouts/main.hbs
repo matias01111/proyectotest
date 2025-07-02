@@ -31,7 +31,16 @@
     {{else}}
       <nav class="navbar">
         <div class="nav-container">
-          <a href="/" class="nav-logo">MiPortalEstudiantil</a>
+          {{!-- Logo redirige según tipo de usuario --}}
+          {{#if usuario}}
+            {{#if (eq usuario.role "profesor")}}
+              <a href="/profesor/dashboard" class="nav-logo">MiPortalEstudiantil</a>
+            {{else}}
+              <a href="/" class="nav-logo">MiPortalEstudiantil</a>
+            {{/if}}
+          {{else}}
+            <a href="/" class="nav-logo">MiPortalEstudiantil</a>
+          {{/if}}
           <ul class="nav-menu">
             {{#if isDashboard}}
               <li class="nav-item"><a href="/dashboard" class="nav-link">Mi Horario</a></li>

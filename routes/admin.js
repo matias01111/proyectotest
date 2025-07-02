@@ -28,6 +28,7 @@ router.get('/dashboard', requireAdmin, adminController.dashboard);
 router.get('/mensajes', requireAdmin, adminController.mensajes);
 router.get('/usuarios', requireAdmin, adminController.usuarios);
 router.get('/perfil', requireAdmin, adminController.perfilVista);
+router.get('/profesores/pendientes', requireAdmin, adminController.profesoresPendientes);
 
 // RUTA PARA EDITAR PERFIL ADMIN (centrado en la vista)
 router.get('/perfil/editar', requireAdmin, async (req, res) => {
@@ -42,5 +43,9 @@ router.get('/perfil/editar', requireAdmin, async (req, res) => {
 router.post('/perfil', requireAdmin, upload.single('foto'), adminController.perfilEditar);
 router.post('/mensajes/eliminar/:id', requireAdmin, adminController.eliminarMensaje);
 router.post('/usuarios/eliminar/:id', requireAdmin, adminController.eliminarUsuario);
+router.post('/profesores/:id/aprobar', requireAdmin, adminController.aprobarProfesor, (req, res) => {
+  res.redirect('/admin/profesores/pendientes?exito=Profesor aprobado');
+});
+router.post('/profesores/:id/rechazar', requireAdmin, adminController.rechazarProfesor);
 
 module.exports = router;

@@ -16,8 +16,10 @@ const adminRoutes = require('./routes/admin');
 const recordatorioRoutes = require('./routes/recordatorio');
 const perfilRoutes = require('./routes/perfil');
 const misAsignaturasRoutes = require('./routes/mis-asignaturas'); // <-- Agrega esta línea
+const profesorRoutes = require('./routes/profesor');
 const exphbs = require('express-handlebars');
 const requireLogin = require('./middlewares/auth');
+const requireUsuarioOProfesor = require('./middlewares/authUsuarioOProfesor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +34,11 @@ const hbs = exphbs.create({
     hasEvaluacion: function(asigId, evaluaciones, options) {
       if (!evaluaciones) return '';
       return evaluaciones.some(e => String(e.asignatura_id) === String(asigId)) ? options.fn(this) : '';
+    },
+    fechaBonita: function(fecha) {
+      if (!fecha) return '';
+      const d = new Date(fecha);
+      return d.toLocaleDateString('es-CL');
     }
   },
   partialsDir: path.join(__dirname, 'views', 'partials')
@@ -69,7 +76,7 @@ app.get('/', (req, res) => {
 });
 
 // Rutas principales
-app.use('/asignaturas', requireLogin, asignaturasRoutes);
+app.use('/asignaturas', requireUsuarioOProfesor, asignaturasRoutes);
 app.use('/mis-asignaturas', requireLogin, misAsignaturasRoutes);
 app.use('/dashboard', requireLogin, dashboardRoutes);
 app.use('/perfil', requireLogin, perfilRoutes);
@@ -79,6 +86,7 @@ app.use('/auth', authRoutes);
 app.use('/ayuda', ayudaRoutes);
 app.use('/admin', adminRoutes);
 app.use('/bloques', bloquesRoutes);
+app.use('/profesor', profesorRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

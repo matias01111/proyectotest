@@ -22,8 +22,14 @@ exports.listar = async (req, res) => {
     // Traer todas las evaluaciones futuras del usuario
     const hoy = new Date().toISOString().slice(0,10);
     const evaluacionesRes = await pool.query(
-      `SELECT * FROM evaluacion WHERE usuario_id = $1 AND fecha >= $2`,
-      [usuario_id, hoy]
+      `SELECT e.*
+         FROM evaluacion e
+         WHERE e.usuario_id = $1
+           AND e.asignatura_id IN (SELECT asignatura_id FROM inscripcion WHERE usuario_id = $1)
+           AND e.fecha >= CURRENT_DATE
+         ORDER BY e.fecha ASC
+      `,
+      [req.session.userId]
     );
     const evaluaciones = evaluacionesRes.rows;
 
@@ -162,7 +168,7 @@ exports.misAsignaturas = async (req, res) => {
   const usuario_id = req.session.userId;
   // Obtén las asignaturas y evaluaciones del usuario
   const asignaturas = (await pool.query('SELECT * FROM asignatura WHERE ...')).rows;
-  const evaluaciones = (await pool.query('SELECT * FROM evaluacion WHERE usuario_id = $1 AND fecha >= CURRENT_DATE', [usuario_id])).rows;
+  const evaluaciones = (await pool.query('SELECT e.* FROM evaluacion e WHERE e.usuario_id = $1 AND e.asignatura_id IN (SELECT asignatura_id FROM inscripcion WHERE usuario_id = $1) AND e.fecha >= CURRENT_DATE ORDER BY e.fecha ASC', [req.session.userId])).rows;
 
   // Asigna la próxima evaluación a cada asignatura
   asignaturas.forEach(asig => {

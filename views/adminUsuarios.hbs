@@ -1,7 +1,7 @@
 <main style="max-width:800px; margin:48px auto 0 auto; background:#fff; border-radius:18px; box-shadow:0 4px 24px rgba(42,63,102,0.13); padding:40px 36px 28px 36px; border:2.5px solid #3b5998;">
   <h2 style="color:#3b5998; margin-bottom:18px;">Usuarios registrados</h2>
   {{#if exito}}
-    <div id="msg-exito" style="background:#e6f9ed; color:#217a4b; border-radius:8px; padding:10px 22px; font-weight:600; box-shadow:0 2px 8px rgba(42,63,102,0.13); font-size:1em; margin-bottom:18px; text-align:center;">
+    <div id="msg-exito" style="background:#e6f9ed; color:#217a4b; border-radius:8px; padding:10px 22px; font-weight:600; box-shadow:0 2px 8px rgba(42,63,102,0.13); font-size:1em; margin:18px auto 18px auto; max-width:320px; text-align:center;">
       {{exito}}
     </div>
   {{/if}}
@@ -58,7 +58,9 @@
     </tbody>
   </table>
   <div style="margin-top:24px; text-align:center;">
-    <a href="/admin/dashboard" style="color:#3b5998; text-decoration:underline;">Volver al panel</a>
+    <a href="/admin/dashboard" class="btn-logout" style="min-width:160px; display:inline-block; background:#eaf0fa; color:#3b5998; border:1.5px solid #3b5998; border-radius:8px; padding:10px 0; font-weight:600; text-decoration:none; transition:background 0.18s, color 0.18s;">
+      Volver al panel
+    </a>
   </div>
 </main>
 
