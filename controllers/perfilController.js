@@ -25,14 +25,25 @@ exports.verPerfil = async (req, res) => {
   `, [userId, hoyChile]);
 
   // Formatea la fecha para mostrarla bonito y con día en mayúscula
-  const evaluaciones = evalsResult.rows.map(ev => ({
-    ...ev,
-    fechaString: capitalizeFirst(
-      DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' })
-        .setLocale('es')
-        .toFormat('cccc d/LL/yyyy')
-    )
-  }));
+  const evaluaciones = evalsResult.rows.map(ev => {
+    let fechaString = 'Fecha no disponible';
+    
+    if (ev.fecha) {
+      try {
+        // La fecha viene como YYYY-MM-DD, convierte a DateTime
+        const dt = DateTime.fromISO(ev.fecha, { zone: 'America/Santiago' });
+        fechaString = capitalizeFirst(dt.setLocale('es').toFormat('cccc d/LL/yyyy'));
+      } catch (error) {
+        console.log('Error al formatear fecha:', ev.fecha, error);
+        fechaString = 'Fecha inválida';
+      }
+    }
+    
+    return {
+      ...ev,
+      fechaString
+    };
+  });
 
   const usuario = userResult.rows[0];
   res.render('perfil', { usuario, evaluaciones, isDashboard: true });
